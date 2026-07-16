@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="HelpMate.InterviewCoach.Api/HelpMate.InterviewCoach.Api.csproj" />
+  <Project Path="HelpMate.InterviewCoach.Core/HelpMate.InterviewCoach.Core.csproj" />
+  <Project Path="HelpMate.InterviewCoach.Infrastructure/HelpMate.InterviewCoach.Infrastructure.csproj" />
+  <Project Path="HelpMate.InterviewCoach.Tests/HelpMate.InterviewCoach.Tests.csproj" />
+</Solution>
