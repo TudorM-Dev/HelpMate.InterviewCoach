@@ -1,9 +1,11 @@
 ﻿using HelpMate.InterviewCoach.Core.Entities;
+using HelpMate.InterviewCoach.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace HelpMate.InterviewCoach.Infrastructure.Data;
 
-public class InterviewDbContext : DbContext
+public class InterviewDbContext : IdentityDbContext<ApplicationUser>
 {
     public InterviewDbContext(DbContextOptions<InterviewDbContext> options)
         : base(options)
