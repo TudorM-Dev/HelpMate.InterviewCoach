@@ -1,0 +1,19 @@
+root = true
+
+[*.cs]
+
+# Use file-scoped namespaces (C# 10+) instead of block-scoped
+csharp_style_namespace_declarations = file_scoped:warning
+
+# Prefer 'var' when the type is already obvious from the right-hand side
+csharp_style_var_when_type_is_apparent = true:suggestion
+
+# Remove unnecessary using directives (ImplicitUsings covers System and friends)
+dotnet_diagnostic.IDE0005.severity = warning
+
+# Place using directives outside the namespace
+csharp_using_directive_placement = outside_namespace:warning
+
+# Prefer expression-bodied members for single-line properties and accessors
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_expression_bodied_accessors = true:suggestion
