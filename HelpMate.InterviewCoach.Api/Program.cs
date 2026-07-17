@@ -1,3 +1,8 @@
+using HelpMate.InterviewCoach.Core.Interfaces;
+using HelpMate.InterviewCoach.Core.Services;
+using HelpMate.InterviewCoach.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -5,6 +10,12 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+builder.Services.AddDbContext<InterviewDbContext>(options =>
+options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IInterviewRepository, EfInterviewRepository>();
+builder.Services.AddScoped<InterviewService>();
 
 if (app.Environment.IsDevelopment())
 {
