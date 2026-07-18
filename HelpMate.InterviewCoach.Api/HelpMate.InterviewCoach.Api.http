@@ -1,4 +1,5 @@
 @host = https://localhost:7163
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MzA3Y2U5MS1kMDYwLTQyNmUtYjQ2YS05NTE3NDQ1N2Q0MmEiLCJlbWFpbCI6InR1ZG9yQHRlc3QuY29tIiwianRpIjoiM2Y3OWExMmMtNWYzNS00NDRmLWEzMDAtNzViYWY3MjFlNDg2IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc4NDM4ODA2OCwiaXNzIjoiSGVscE1hdGUuSW50ZXJ2aWV3Q29hY2giLCJhdWQiOiJIZWxwTWF0ZS5JbnRlcnZpZXdDb2FjaCJ9.M3qi0yQDZpR0NmFESC4S2vivYxHdY7fM0k4lw2yH5Y8
 
 ### Register a new user
 POST {{host}}/api/auth/register
@@ -18,3 +19,19 @@ Content-Type: application/json
   "email": "tudor@test.com",
   "password": "Test123!"
 }
+
+### Create a session
+POST {{host}}/api/sessions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "targetRole": ".NET Backend Junior"
+}
+
+### List my sessions
+GET {{host}}/api/sessions
+Authorization: Bearer {{token}}
+
+### Reject request without a token (expect 401)
+GET {{host}}/api/sessions
