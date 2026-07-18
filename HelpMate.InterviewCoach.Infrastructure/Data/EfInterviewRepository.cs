@@ -31,6 +31,12 @@ public class EfInterviewRepository : IInterviewRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<int> CountSessionsCreatedSinceAsync(string userId, DateTime since, CancellationToken cancellationToken = default)
+    {
+        return await _context.Sessions
+            .CountAsync(s => s.UserId == userId && s.CreatedAt >= since, cancellationToken);
+    }
+
     public Task AddSessionAsync(InterviewSession session, CancellationToken cancellationToken = default)
     {
         _context.Sessions.Add(session);

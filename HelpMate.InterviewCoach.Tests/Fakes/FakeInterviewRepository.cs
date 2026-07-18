@@ -22,6 +22,11 @@ public class FakeInterviewRepository : IInterviewRepository
         return Task.FromResult(result);
     }
 
+    public Task<int> CountSessionsCreatedSinceAsync(string userId, DateTime since, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_sessions.Count(s => s.UserId == userId && s.CreatedAt >= since));
+    }
+
     public Task AddSessionAsync(InterviewSession session, CancellationToken cancellationToken = default)
     {
         session.Id = _nextSessionId++;

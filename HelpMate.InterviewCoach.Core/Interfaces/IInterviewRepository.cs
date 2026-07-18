@@ -8,6 +8,8 @@ public interface IInterviewRepository
 
     Task<IReadOnlyList<InterviewSession>> GetSessionsForUserAsync(string userId, CancellationToken cancellationToken = default);
 
+    Task<int> CountSessionsCreatedSinceAsync(string userId, DateTime since, CancellationToken cancellationToken = default);
+
     Task AddSessionAsync(InterviewSession session, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);

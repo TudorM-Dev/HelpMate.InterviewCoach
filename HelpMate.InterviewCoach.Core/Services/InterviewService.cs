@@ -18,6 +18,17 @@ public class InterviewService
         string targetRole,
         CancellationToken cancellationToken = default)
     {
+        var startOfDay = DateTime.UtcNow.Date;
+        var sessionsToday = await _repository.CountSessionsCreatedSinceAsync(
+            userId, startOfDay, cancellationToken);
+
+        if (sessionsToday >= InterviewRules.MaxSessionsPerUserPerDay)
+        {
+            throw new InterviewRuleViolationException(
+                $"You have reached the limit of {InterviewRules.MaxSessionsPerUserPerDay} interview sessions per day. " +
+                "Please come back tomorrow.");
+        }
+
         var session = new InterviewSession
         {
             UserId = userId,
