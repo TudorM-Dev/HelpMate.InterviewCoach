@@ -21,11 +21,6 @@ public static class RoleSeeder
         }
     }
 
-    /// <summary>
-    /// Creates the administrator account from configuration. Nothing is seeded unless both
-    /// Admin:Email and Admin:Password are configured, so no environment ever gets a default
-    /// administrator password it did not ask for.
-    /// </summary>
     public static async Task SeedAdminAsync(IServiceProvider services, IConfiguration configuration)
     {
         var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(RoleSeeder));

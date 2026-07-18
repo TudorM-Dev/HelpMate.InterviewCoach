@@ -5,10 +5,6 @@ using HelpMate.InterviewCoach.Api.Contracts;
 
 namespace HelpMate.InterviewCoach.Api.Services;
 
-/// <summary>
-/// Thin wrapper over the public REST API. Every UI action goes through the same endpoints an
-/// external client would call, so the API stays the single source of truth.
-/// </summary>
 public class ApiClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -142,10 +138,6 @@ public class ApiClient
         return await _http.SendAsync(request);
     }
 
-    /// <summary>
-    /// The API reports failures as RFC 7807 problem details, or as a list of Identity errors on
-    /// registration. Both are surfaced to the user as plain text.
-    /// </summary>
     private static async Task<string> ReadErrorAsync(HttpResponseMessage response)
     {
         var body = await response.Content.ReadAsStringAsync();
@@ -171,7 +163,6 @@ public class ApiClient
         }
         catch (JsonException)
         {
-            // Not JSON, fall through to the raw body.
         }
 
         return body;

@@ -1,4 +1,3 @@
-/* Windows 11 inspired dark theme with a teal accent. */
 
 :root {
     --bg: #202020;
@@ -64,7 +63,6 @@ p { margin: 0 0 1rem; }
 .dim { color: var(--text-dim); }
 .small { font-size: 0.85rem; }
 
-/* ---------- Layout ---------- */
 
 .shell {
     min-height: 100vh;
@@ -146,7 +144,6 @@ p { margin: 0 0 1rem; }
     text-align: center;
 }
 
-/* ---------- Surfaces ---------- */
 
 .card {
     background: var(--surface);
@@ -188,7 +185,6 @@ p { margin: 0 0 1rem; }
     max-width: 60ch;
 }
 
-/* ---------- Controls ---------- */
 
 .btn {
     display: inline-flex;
@@ -269,7 +265,6 @@ label {
     margin: 2rem auto;
 }
 
-/* ---------- Feedback ---------- */
 
 .alert {
     padding: 0.7rem 0.9rem;
@@ -291,7 +286,6 @@ label {
     color: var(--accent);
 }
 
-/* ---------- Interview ---------- */
 
 .qa {
     border-left: 2px solid var(--border-strong);
@@ -347,7 +341,6 @@ label {
     margin-bottom: 0.25rem;
 }
 
-/* ---------- Bits ---------- */
 
 .score {
     font-variant-numeric: tabular-nums;
@@ -437,7 +430,6 @@ th {
     to { transform: rotate(360deg); }
 }
 
-/* Progress bars for the score trend */
 
 .trend { display: flex; flex-direction: column; gap: 0.5rem; }
 
@@ -490,4 +482,41 @@ th {
     .topnav { gap: 0.7rem; }
     .who { display: none; }
     .trend-row { grid-template-columns: 1fr; gap: 0.3rem; }
+}
+
+.landing {
+    max-width: 34rem;
+    margin: 5rem auto 0;
+    text-align: center;
+}
+
+.landing h1 {
+    font-size: 2.6rem;
+    line-height: 1.15;
+    margin: 1.25rem 0 0;
+    letter-spacing: -0.02em;
+}
+
+.landing .lede {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    margin: 1rem auto 2rem;
+    max-width: 30rem;
+}
+
+.landing-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.landing-note {
+    margin: 1rem 0 0;
+}
+
+@media (max-width: 640px) {
+    .landing { margin-top: 2.5rem; }
+    .landing h1 { font-size: 2rem; }
+    .landing h1 br { display: none; }
 }

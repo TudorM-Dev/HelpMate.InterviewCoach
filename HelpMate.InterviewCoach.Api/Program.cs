@@ -20,14 +20,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-// --- Blazor UI ---
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddScoped<AuthState>();
 builder.Services.AddScoped<ApiClient>();
 
-// The UI is a client of the same public API, so it goes through HTTP like any other consumer.
 builder.Services.AddScoped(sp =>
 {
     var accessor = sp.GetRequiredService<IHttpContextAccessor>();
@@ -41,7 +39,6 @@ builder.Services.AddScoped(sp =>
 
     if (sp.GetRequiredService<IWebHostEnvironment>().IsDevelopment())
     {
-        // The local dev certificate is self-signed; the UI calls its own host.
         handler.ServerCertificateCustomValidationCallback =
             HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
     }

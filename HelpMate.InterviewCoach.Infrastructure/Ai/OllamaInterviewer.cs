@@ -23,10 +23,6 @@ public class OllamaInterviewer : IAiInterviewer
 
     private sealed record ToolOutcome(string Content, bool EndsTurn);
 
-    /// <summary>
-    /// Small models tend to fixate on the topic of the first question. Steering each question
-    /// towards a different area keeps the interview varied.
-    /// </summary>
     private static readonly string[] QuestionFocusAreas =
     [
         "a core language or framework concept",
@@ -61,7 +57,6 @@ public class OllamaInterviewer : IAiInterviewer
             return;
         }
 
-        // Waiting on the candidate is not something the model needs to decide.
         if (NextStepFor(session) is NextStep.WaitForCandidate)
         {
             _logger.LogInformation("Session {SessionId} is waiting for the candidate's answer", sessionId);
@@ -89,7 +84,6 @@ public class OllamaInterviewer : IAiInterviewer
 
             if (toolCalls.Count == 0)
             {
-                // The model answered with plain text instead of acting. Nudge it once.
                 messages.Add(new Message
                 {
                     Role = ChatRole.User,
@@ -187,9 +181,6 @@ public class OllamaInterviewer : IAiInterviewer
         }
     }
 
-    /// <summary>
-    /// After an evaluation, tell the model exactly what to do next instead of letting it guess.
-    /// </summary>
     private async Task<string> DescribeStepAfterFeedbackAsync(
         int sessionId,
         string userId,

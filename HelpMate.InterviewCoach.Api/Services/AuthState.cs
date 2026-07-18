@@ -3,11 +3,6 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace HelpMate.InterviewCoach.Api.Services;
 
-/// <summary>
-/// Holds the signed-in user's JWT for the UI. The token is the same one the public API issues,
-/// so the UI authenticates exactly like any other client, and it is kept in protected session
-/// storage so a page refresh does not sign the user out.
-/// </summary>
 public class AuthState
 {
     private const string StorageKey = "helpmate.token";
@@ -24,10 +19,6 @@ public class AuthState
     public string? DisplayName { get; private set; }
     public IReadOnlyList<string> Roles { get; private set; } = [];
 
-    /// <summary>
-    /// False until the token has been read back from browser storage. Components should wait for
-    /// this before deciding that nobody is signed in.
-    /// </summary>
     public bool IsInitialized { get; private set; }
 
     public bool IsSignedIn => !string.IsNullOrEmpty(Token);
@@ -35,10 +26,6 @@ public class AuthState
 
     public event Action? Changed;
 
-    /// <summary>
-    /// Restores a previous session. Only callable once the circuit can reach the browser, so it
-    /// belongs in OnAfterRenderAsync rather than OnInitializedAsync.
-    /// </summary>
     public async Task InitializeAsync()
     {
         if (IsInitialized)
@@ -57,7 +44,6 @@ public class AuthState
         }
         catch
         {
-            // Unreadable or tampered storage simply means "not signed in".
         }
 
         IsInitialized = true;

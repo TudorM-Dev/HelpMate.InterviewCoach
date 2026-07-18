@@ -5,10 +5,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace HelpMate.InterviewCoach.Api.Data;
 
-/// <summary>
-/// Seeds a read-only showcase account holding finished interviews. Visitors can see exactly
-/// what the AI coach produces without spending any tokens, which keeps a public demo free to run.
-/// </summary>
 public static class DemoSeeder
 {
     public static async Task SeedAsync(IServiceProvider services, IConfiguration configuration)
