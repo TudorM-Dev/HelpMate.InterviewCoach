@@ -1,29 +1,78 @@
 # HelpMate Interview Coach
 
-An AI interview coach. You pick the role you are preparing for, and an AI agent runs a technical
-interview: it asks questions one at a time, reads your free-text answers, scores them out of ten
-and explains what was missing. Every session is saved so you can see yourself improve.
+**An AI agent that runs technical interviews.** Pick the role you are preparing for, and it asks
+you questions one at a time, reads your free-text answers, scores them out of ten and explains what
+was missing. Every session is saved so you can watch yourself improve.
 
-Built with ASP.NET Core 10, Entity Framework Core, ASP.NET Core Identity with JWT, Blazor, and a
-tool-using AI agent.
-
-> **Live demo:** _not deployed yet_
-> **Demo account:** `demo@helpmate.local` / `Demo123!` — two finished interviews to browse.
+![.NET](https://img.shields.io/badge/.NET-10-512BD4)
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-Web%20API%20%2B%20Blazor-512BD4)
+![EF Core](https://img.shields.io/badge/EF%20Core-SQLite-blue)
+![Auth](https://img.shields.io/badge/Auth-Identity%20%2B%20JWT-green)
+![Status](https://img.shields.io/badge/status-work%20in%20progress-orange)
 
 ---
 
+## 🚧 Status: work in progress
+
+The application runs end to end today — you can register, run a full AI interview, get scored
+feedback and browse your history. What is not finished is the public deployment.
+
+| | |
+| --- | --- |
+| ✅ **Working** | Domain rules with unit tests · EF Core persistence · Identity + JWT · per-user ownership · role-based admin · the AI agent with tool use · Blazor UI |
+| 🚧 **In progress** | Public deployment with a live demo link |
+| 📋 **Planned** | A hosted-model implementation of `IAiInterviewer` (pending API access), Scalar UI for browsing the API |
+
+The AI agent currently runs against a **local model through [Ollama](https://ollama.com)**, which
+is free to run but means the app has to be started locally to try the live interview. Because the
+AI provider sits behind an interface, swapping in a hosted model is one new file and one line of
+configuration — that is the next piece of work.
+
+**To try it now:** clone it and follow [Running it locally](#running-it-locally). It takes about
+five minutes. The demo account is seeded with two finished interviews you can browse immediately.
+
+---
+
+<!--
+  SCREENSHOTS - add your own:
+  1. Run the app, press Win+Shift+S, capture the landing page, the dashboard and a transcript.
+  2. Save them as docs/landing.png, docs/dashboard.png, docs/transcript.png
+  3. Delete this comment and uncomment the block below.
+
+  ## Screenshots
+
+  | Landing | Dashboard | Transcript |
+  | --- | --- | --- |
+  | ![Landing](docs/landing.png) | ![Dashboard](docs/dashboard.png) | ![Transcript](docs/transcript.png) |
+-->
+
 ## What this project demonstrates
 
-**An AI agent that calls real backend functions, not a chatbot.** The model is given three tools
-that map onto real operations — `save_question`, `save_answer_feedback`, `complete_session` — and
-it decides when to call them. The tools are the application's own domain operations, so business
-rules are enforced on the model exactly as they are on a user: ask for a sixth question in a
-five-question interview and the tool call is rejected, with the reason handed back to the model so
-it can adapt.
+### An AI agent that calls real backend functions
 
-**Authentication and authorisation done properly.** ASP.NET Core Identity issues JWTs; endpoints
-are protected by default; every read and write is scoped to the signed-in user; the Admin role
-unlocks a separate set of endpoints.
+Not a chatbot with a system prompt. The model is given three tools that map onto real operations —
+`save_question`, `save_answer_feedback`, `complete_session` — and it decides when to call them.
+
+The tools **are** the application's own domain operations, so the model is subject to the same
+rules as a human user. Ask for a sixth question in a five-question interview and the call is
+rejected — and the rejection message is handed back to the model, which reads it and closes the
+interview instead:
+
+```
+Rejected: This session already has the maximum of 5 questions.
+          Complete the session instead of asking another one.
+```
+
+A business rule becomes feedback that corrects the agent's behaviour. Nothing about the model is
+trusted: it cannot exceed the question limit, cannot return a score of 47 out of 10, and cannot
+write to a session that is not the caller's.
+
+### Authentication and authorisation done properly
+
+ASP.NET Core Identity issues JWTs. Endpoints are protected by default, every read and write is
+scoped to the signed-in user, and the Admin role unlocks a separate set of endpoints. The UI is
+just another client of the same public API — it authenticates with the same token an external
+consumer would use.
 
 ---
 
@@ -43,66 +92,64 @@ interview rules and the interfaces (`IInterviewRepository`, `IAiInterviewer`, `I
 `Infrastructure` implements them. That inversion is what makes the AI provider and the database
 swappable, and what lets the business rules be tested with no database, no network and no AI.
 
-A few consequences worth pointing out:
+Some consequences worth pointing out:
 
 - **`InterviewSession.UserId` is a plain string, not a navigation property to `ApplicationUser`.**
   Identity lives in `Infrastructure`; if the entity referenced it, `Core` would depend on Identity.
-  Ownership is enforced by comparing that string, and the whole authentication layer was added
-  later without touching `Core`.
+  Ownership is enforced by comparing that string — and the entire authentication layer was added
+  later without touching `Core` at all.
 - **Configuration uses the Fluent API, not data annotations.** `[Key]` and `[Required]` are EF
   types, and putting them on entities would drag EF into `Core`.
-- **The tools the agent calls are `InterviewService` methods.** There is no separate rule engine
-  for the AI. The model is subject to the same invariants as a human user.
+- **The agent's tools are `InterviewService` methods.** There is no separate rule engine for the AI.
 
 ---
 
 ## How a session works
 
 ```
-POST /api/sessions              create a session for a target role
-POST /api/sessions/{id}/advance the agent asks the next question, or scores the last answer
-POST /api/sessions/{id}/answers submit an answer
-GET  /api/sessions              your history
-GET  /api/sessions/{id}         one full transcript
+POST /api/sessions               create a session for a target role
+POST /api/sessions/{id}/advance  the agent asks the next question, or scores the last answer
+POST /api/sessions/{id}/answers  submit an answer
+GET  /api/sessions               your history
+GET  /api/sessions/{id}          one full transcript
 ```
 
-`advance` returns nothing from the agent itself — the agent's output *is* its side effects, written
-through its tools. The endpoint then reads the session back and returns it, so the database stays
-the single source of truth.
+`advance` returns nothing from the agent itself — the agent's output **is** its side effects,
+written through its tools. The endpoint then reads the session back and returns it, so the database
+stays the single source of truth.
 
-Sequencing (evaluate the pending answer, then ask the next question, then finish) is computed in
-code rather than left to the model, which small local models get wrong. The model still owns the
+Sequencing (evaluate the pending answer → ask the next question → finish) is computed in code
+rather than left to the model, because small local models get it wrong. The model still owns the
 parts that need judgement: what to ask, and how good an answer is.
 
 ---
 
 ## Security decisions
 
-- **The model never supplies identity.** `save_question` takes only the question text. The session
+- **The model never supplies identity.** `save_question` takes only the question text; the session
   id and user id are bound by the server from the authenticated request. A prompt injection in a
   user's answer cannot redirect a write to another session, because the parameter does not exist.
 - **"Not found" and "not yours" return the same 404.** Distinguishing them would let someone
   enumerate which session ids are real.
 - **Failed logins do not say which half was wrong**, for the same reason.
-- **Scores from the model are validated server-side.** A model that returns 47 out of 10 is
-  rejected.
-- **Two caps bound AI spend**: five questions per session and three sessions per user per day.
-- **No secret is in `appsettings.json`.** The JWT signing key, the admin password and the demo
-  password come from user secrets in development and environment variables in production. Seeding
-  is skipped entirely when credentials are not configured, so no environment silently gets a known
-  password.
+- **Scores from the model are validated server-side.**
+- **Two caps bound AI spend:** five questions per session, three sessions per user per day.
+- **No secret is in `appsettings.json`.** The JWT signing key and the seeded account passwords come
+  from user secrets in development and environment variables in production. Seeding is skipped
+  entirely when credentials are not configured, so no environment silently gets a known password.
 
 ---
 
 ## Running it locally
 
-Requires the .NET 10 SDK and [Ollama](https://ollama.com) for the AI agent.
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download) and
+[Ollama](https://ollama.com) for the AI agent.
 
 ```bash
-# 1. AI model
+# 1. AI model (about 4.7 GB)
 ollama pull qwen2.5:7b
 
-# 2. Secrets (development)
+# 2. Secrets
 cd HelpMate.InterviewCoach.Api
 dotnet user-secrets set "Jwt:Key" "<any long random string>"
 dotnet user-secrets set "Admin:Email" "admin@helpmate.local"
@@ -120,8 +167,12 @@ dotnet ef database update \
 dotnet run --project HelpMate.InterviewCoach.Api --launch-profile https
 ```
 
-Then open <https://localhost:7163>. Roles, the admin account and the demo interviews are seeded on
-first start.
+Open <https://localhost:7163>. Roles, the admin account and the demo interviews are seeded on first
+start.
+
+**Fastest way to see what it does:** click *See a sample interview* on the landing page. It signs
+you in as the demo account, which already holds two finished interviews with real questions,
+answers and feedback.
 
 ```bash
 dotnet test    # unit tests for the interview rules
@@ -146,25 +197,29 @@ dotnet test    # unit tests for the interview rules
 **SQLite in development, SQL Server as the production target.** Provider-specific code is confined
 to one `UseSqlite` call and one package reference.
 
-**The AI provider is swappable.** `IAiInterviewer` is a `Core` interface; `OllamaInterviewer` is one
-implementation. A hosted-model implementation is a new file in `Infrastructure` and one line in
-`Program.cs` — nothing else changes. Ollama runs locally and free, which is what a small local model
-buys: no per-token cost while developing, at the price of shallower feedback than a frontier model.
+**The AI provider is swappable.** `IAiInterviewer` is a `Core` interface and `OllamaInterviewer` is
+one implementation. Running a small model locally costs nothing while developing, at the price of
+shallower feedback than a frontier model would give.
 
-**Exceptions carry messages written for the model.** A rejected tool call returns its message to the
-agent as the tool result, so a business rule becomes feedback that corrects the agent's behaviour.
-The cost is that the debugger stops on expected control flow; that is a deliberate trade.
+**Exceptions carry messages written for the model.** A rejected tool call returns its message to
+the agent as the tool result. The cost is that a debugger stops on expected control flow; that is a
+deliberate trade.
 
 **Repository methods are named after what the application needs**, not a generic `IRepository<T>`.
-A generic repository over EF Core adds a layer without adding meaning, and usually leaks `IQueryable`
-back out, which defeats the point of the abstraction.
+A generic repository over EF Core adds a layer without adding meaning, and usually leaks
+`IQueryable` back out, which defeats the point of the abstraction.
 
 ---
 
-## Status
+## Roadmap
 
-Working: domain rules with unit tests, persistence, register/login with JWT, per-user ownership,
-role-based admin, the AI agent, and the Blazor UI.
+- [ ] Deploy with a public demo link
+- [ ] Hosted-model implementation of `IAiInterviewer` so the live demo can run interviews
+- [ ] Scalar UI for browsing the API in the browser
+- [ ] Integration tests against an in-memory database
 
-Next: deployment with a public demo link, and a hosted-model implementation of `IAiInterviewer`
-alongside the local one.
+---
+
+Built as a portfolio project. The two skills it is meant to show are **authentication and
+authorisation** and **AI agent integration with tool use** — everything else is there to give those
+two somewhere real to live.
