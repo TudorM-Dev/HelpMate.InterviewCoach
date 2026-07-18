@@ -1,5 +1,7 @@
+using HelpMate.InterviewCoach.Api.Components;
 using HelpMate.InterviewCoach.Api.Data;
 using HelpMate.InterviewCoach.Api.Middleware;
+using HelpMate.InterviewCoach.Api.Services;
 using HelpMate.InterviewCoach.Core.Interfaces;
 using HelpMate.InterviewCoach.Core.Services;
 using HelpMate.InterviewCoach.Infrastructure.Ai;
@@ -17,6 +19,41 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+// --- Blazor UI ---
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<AuthState>();
+builder.Services.AddScoped<ApiClient>();
+
+// The UI is a client of the same public API, so it goes through HTTP like any other consumer.
+builder.Services.AddScoped(sp =>
+{
+    var accessor = sp.GetRequiredService<IHttpContextAccessor>();
+    var request = accessor.HttpContext?.Request;
+
+    var baseAddress = request is not null
+        ? $"{request.Scheme}://{request.Host}"
+        : "https://localhost:7163";
+
+    var handler = new HttpClientHandler();
+
+    if (sp.GetRequiredService<IWebHostEnvironment>().IsDevelopment())
+    {
+        // The local dev certificate is self-signed; the UI calls its own host.
+        handler.ServerCertificateCustomValidationCallback =
+            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+    }
+
+    return new HttpClient(handler)
+    {
+        BaseAddress = new Uri(baseAddress),
+        Timeout = TimeSpan.FromMinutes(5)
+    };
+});
+
+builder.Services.AddHttpContextAccessor();
 
 // --- Persistence ---
 builder.Services.AddDbContext<InterviewDbContext>(options =>
@@ -87,9 +124,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+app.UseAntiforgery();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 app.Run();

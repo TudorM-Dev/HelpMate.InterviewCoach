@@ -1,0 +1,171 @@
+﻿@page "/dashboard"
+@inject ApiClient Api
+@inject AuthState Auth
+@inject NavigationManager Nav
+
+<PageTitle>Dashboard - HelpMate Interview Coach</PageTitle>
+
+@if (!Auth.IsSignedIn)
+{
+    <div class="card">
+        <h1>Sign in first</h1>
+        <p class="muted">You need an account to run an interview.</p>
+        <a class="btn" href="/login">Sign in</a>
+    </div>
+}
+else
+{
+    <div class="row" style="margin-bottom:1.25rem">
+        <div>
+            <h1>Your interviews</h1>
+            <p class="muted small" style="margin:0">
+                @if (_sessions.Count == 0)
+                {
+                    <span>Nothing here yet. Start your first interview below.</span>
+                }
+                else
+                {
+                    <span>@_sessions.Count session@(_sessions.Count == 1 ? "" : "s") so far.</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Start a new interview</h3>
+        <p class="muted small">Name the role you are preparing for. The coach adapts its questions to it.</p>
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-error">@_error</div>
+        }
+
+        <div class="actions" style="align-items:flex-end">
+            <div style="flex:1; min-width:16rem">
+                <label for="role">Target role</label>
+                <input id="role" @bind="_targetRole" placeholder=".NET Backend Junior" />
+            </div>
+            <button class="btn" @onclick="StartAsync" disabled="@(_busy || string.IsNullOrWhiteSpace(_targetRole))">
+                @if (_busy)
+                {
+                    <span class="spinner"></span>
+                    <span>Starting...</span>
+                }
+                else
+                {
+                    <span>Start interview</span>
+                }
+            </button>
+        </div>
+
+        <div class="actions" style="margin-top:0.75rem">
+            @foreach (var suggestion in Suggestions)
+            {
+                <button class="btn btn-ghost small" @onclick="() => _targetRole = suggestion">@suggestion</button>
+            }
+        </div>
+    </div>
+
+    @if (_scored.Count > 1)
+    {
+        <div class="card">
+            <h3>Your scores over time</h3>
+            <div class="trend">
+                @foreach (var session in _scored)
+                {
+                    <div class="trend-row">
+                        <span class="muted">@session.TargetRole</span>
+                        <div class="trend-bar">
+                            <div class="trend-fill" style="width:@((session.AverageScore ?? 0) * 10)%"></div>
+                        </div>
+                        <span class="score">@session.AverageScore?.ToString("0.0")</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (_loading)
+    {
+        <div class="card"><span class="spinner"></span> <span class="muted">Loading your history...</span></div>
+    }
+    else
+    {
+        @foreach (var session in _sessions)
+        {
+            <a class="card card-tight card-link" href="/sessions/@session.Id">
+                <div class="row">
+                    <div>
+                        <strong>@session.TargetRole</strong>
+                        <div class="dim small">
+                            @session.CreatedAt.ToLocalTime().ToString("d MMM yyyy, HH:mm")
+                            &middot; @session.QuestionCount question@(session.QuestionCount == 1 ? "" : "s")
+                        </div>
+                    </div>
+                    <div style="text-align:right">
+                        @if (session.AverageScore is not null)
+                        {
+                            <div class="score">@session.AverageScore.Value.ToString("0.0") / 10</div>
+                        }
+                        <span class="badge @(session.Status == InterviewSessionStatus.Completed ? "" : "badge-live")">
+                            @(session.Status == InterviewSessionStatus.Completed ? "Completed" : "In progress")
+                        </span>
+                    </div>
+                </div>
+            </a>
+        }
+    }
+}
+
+@code {
+    private static readonly string[] Suggestions =
+    [
+        ".NET Backend Junior", "SQL & Databases", "Frontend React", "System Design Basics"
+    ];
+
+    private IReadOnlyList<SessionSummaryResponse> _sessions = [];
+    private List<SessionSummaryResponse> _scored = [];
+    private string _targetRole = string.Empty;
+    private string? _error;
+    private bool _busy;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.IsSignedIn)
+        {
+            await LoadAsync();
+        }
+
+        _loading = false;
+    }
+
+    private async Task LoadAsync()
+    {
+        _sessions = await Api.GetSessionsAsync();
+
+        _scored = _sessions
+            .Where(s => s.AverageScore is not null)
+            .OrderBy(s => s.CreatedAt)
+            .ToList();
+    }
+
+    private async Task StartAsync()
+    {
+        _busy = true;
+        _error = null;
+
+        var (session, error) = await Api.CreateSessionAsync(_targetRole.Trim());
+
+        _busy = false;
+
+        if (session is not null)
+        {
+            Nav.NavigateTo($"/interview/{session.Id}");
+        }
+        else
+        {
+            _error = error;
+        }
+    }
+}

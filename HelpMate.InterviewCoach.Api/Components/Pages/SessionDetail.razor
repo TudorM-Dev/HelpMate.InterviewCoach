@@ -1,0 +1,98 @@
+﻿@page "/sessions/{SessionId:int}"
+@inject ApiClient Api
+@inject AuthState Auth
+
+<PageTitle>Interview transcript - HelpMate Interview Coach</PageTitle>
+
+@if (!Auth.IsSignedIn)
+{
+    <div class="card">
+        <h1>Sign in first</h1>
+        <a class="btn" href="/login">Sign in</a>
+    </div>
+}
+else if (_loading)
+{
+    <div class="card"><span class="spinner"></span> <span class="muted">Loading transcript...</span></div>
+}
+else if (_session is null)
+{
+    <div class="card">
+        <h1>Not found</h1>
+        <p class="muted">This interview does not exist, or it is not yours.</p>
+        <a class="btn" href="/dashboard">Back to dashboard</a>
+    </div>
+}
+else
+{
+    <div class="row" style="margin-bottom:1.25rem">
+        <div>
+            <h1>@_session.TargetRole</h1>
+            <p class="muted small" style="margin:0">
+                @_session.CreatedAt.ToLocalTime().ToString("d MMMM yyyy, HH:mm")
+                &middot; @_session.Questions.Count questions
+                @if (_session.AverageScore is not null)
+                {
+                    <span>&middot; average <span class="score">@_session.AverageScore.Value.ToString("0.0") / 10</span></span>
+                }
+            </p>
+        </div>
+        <div class="actions">
+            @if (_session.Status != InterviewSessionStatus.Completed)
+            {
+                <a class="btn" href="/interview/@_session.Id">Continue</a>
+            }
+            <a class="btn btn-ghost" href="/dashboard">Back</a>
+        </div>
+    </div>
+
+    @foreach (var question in _session.Questions.OrderBy(q => q.Order))
+    {
+        <div class="card qa @(question.Answer?.Score is not null ? "evaluated" : "")">
+            <div class="qa-head">
+                <span class="qa-number">Question @question.Order</span>
+                @if (question.Answer?.Score is not null)
+                {
+                    <span class="score">@question.Answer.Score / 10</span>
+                }
+            </div>
+
+            <div class="qa-question">@question.Text</div>
+
+            @if (question.Answer is not null)
+            {
+                <div class="qa-answer">@question.Answer.Text</div>
+
+                @if (question.Answer.FeedbackText is not null)
+                {
+                    <div class="qa-feedback">
+                        <span class="qa-feedback-label">Coach feedback</span>
+                        @question.Answer.FeedbackText
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="dim small" style="margin:0">Not answered.</p>
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public int SessionId { get; set; }
+
+    private SessionDetailResponse? _session;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.IsSignedIn)
+        {
+            _session = await Api.GetSessionAsync(SessionId);
+        }
+
+        _loading = false;
+    }
+}

@@ -1,0 +1,75 @@
+﻿@inherits LayoutComponentBase
+@inject AuthState Auth
+@inject NavigationManager Nav
+@implements IDisposable
+
+<div class="shell">
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-mark">◆</span>
+            <span>HelpMate <strong>Interview Coach</strong></span>
+        </a>
+
+        <nav class="topnav">
+            @if (Auth.IsSignedIn)
+            {
+                <a href="/dashboard">Dashboard</a>
+                @if (Auth.IsAdmin)
+                {
+                    <a href="/admin">Admin</a>
+                }
+                <span class="who">@(Auth.DisplayName ?? Auth.Email)</span>
+                <button class="btn btn-ghost" @onclick="SignOutAsync">Sign out</button>
+            }
+            else if (Auth.IsInitialized)
+            {
+                <a href="/login">Sign in</a>
+                <a class="btn" href="/register">Create account</a>
+            }
+        </nav>
+    </header>
+
+    <main class="content">
+        @if (Auth.IsInitialized)
+        {
+            @Body
+        }
+        else
+        {
+            <div class="card">
+                <span class="spinner"></span> <span class="muted">Loading...</span>
+            </div>
+        }
+    </main>
+
+    <footer class="footer">
+        <span>Practise technical interviews with an AI coach that asks, listens and scores.</span>
+    </footer>
+</div>
+
+<div id="blazor-error-ui">
+    Something went wrong. <a href="" class="reload">Reload</a>
+</div>
+
+@code {
+    protected override void OnInitialized() => Auth.Changed += OnAuthChanged;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Browser storage is only reachable once the circuit is live.
+            await Auth.InitializeAsync();
+        }
+    }
+
+    private void OnAuthChanged() => InvokeAsync(StateHasChanged);
+
+    private async Task SignOutAsync()
+    {
+        await Auth.SignOutAsync();
+        Nav.NavigateTo("/");
+    }
+
+    public void Dispose() => Auth.Changed -= OnAuthChanged;
+}

@@ -1,0 +1,129 @@
+﻿@page "/admin"
+@inject ApiClient Api
+@inject AuthState Auth
+
+<PageTitle>Admin - HelpMate Interview Coach</PageTitle>
+
+@if (!Auth.IsSignedIn)
+{
+    <div class="card">
+        <h1>Sign in first</h1>
+        <a class="btn" href="/login">Sign in</a>
+    </div>
+}
+else if (!Auth.IsAdmin)
+{
+    <div class="card">
+        <h1>Administrators only</h1>
+        <p class="muted">Your account does not have the Admin role.</p>
+        <a class="btn" href="/dashboard">Back to dashboard</a>
+    </div>
+}
+else
+{
+    <h1>Administration</h1>
+    <p class="muted small">Everything across every account.</p>
+
+    @if (_stats is not null)
+    {
+        <div class="grid">
+            <div class="card">
+                <div class="stat-value">@_stats.UserCount</div>
+                <div class="stat-label">Users</div>
+            </div>
+            <div class="card">
+                <div class="stat-value">@_stats.SessionCount</div>
+                <div class="stat-label">Sessions</div>
+            </div>
+            <div class="card">
+                <div class="stat-value">@_stats.CompletedSessionCount</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="card">
+                <div class="stat-value">@(_stats.AverageScore?.ToString("0.0") ?? "-")</div>
+                <div class="stat-label">Average score</div>
+            </div>
+        </div>
+    }
+
+    <div class="card">
+        <h3>Users</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Sessions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in _users)
+                    {
+                        <tr>
+                            <td>@user.DisplayName</td>
+                            <td class="muted">@user.Email</td>
+                            <td>
+                                @foreach (var role in user.Roles)
+                                {
+                                    <span class="badge @(role == "Admin" ? "badge-live" : "")">@role</span>
+                                }
+                            </td>
+                            <td>@user.SessionCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>All sessions</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>User</th>
+                        <th>Started</th>
+                        <th>Status</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var session in _sessions)
+                    {
+                        <tr>
+                            <td>@session.TargetRole</td>
+                            <td class="muted">@session.UserEmail</td>
+                            <td class="dim">@session.CreatedAt.ToLocalTime().ToString("d MMM, HH:mm")</td>
+                            <td>
+                                <span class="badge @(session.Status == InterviewSessionStatus.Completed ? "" : "badge-live")">
+                                    @(session.Status == InterviewSessionStatus.Completed ? "Completed" : "In progress")
+                                </span>
+                            </td>
+                            <td class="score">@(session.AverageScore?.ToString("0.0") ?? "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    private AdminStatsResponse? _stats;
+    private IReadOnlyList<AdminUserResponse> _users = [];
+    private IReadOnlyList<AdminSessionResponse> _sessions = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.IsAdmin)
+        {
+            _stats = await Api.GetAdminStatsAsync();
+            _users = await Api.GetAdminUsersAsync();
+            _sessions = await Api.GetAdminSessionsAsync();
+        }
+    }
+}

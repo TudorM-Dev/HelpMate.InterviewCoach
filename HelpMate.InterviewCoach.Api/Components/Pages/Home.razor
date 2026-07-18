@@ -1,0 +1,63 @@
+﻿@page "/"
+@inject AuthState Auth
+@inject NavigationManager Nav
+
+<PageTitle>HelpMate Interview Coach</PageTitle>
+
+<section class="hero">
+    <span class="badge badge-live">AI interview practice</span>
+    <h1>Practise the interview before it counts.</h1>
+    <p>
+        Pick the role you are aiming for. An AI interviewer asks you real questions one at a time,
+        reads your answers in your own words, scores them out of ten and tells you exactly what was
+        missing. Every session is saved so you can watch yourself improve.
+    </p>
+
+    <div class="actions">
+        @if (Auth.IsSignedIn)
+        {
+            <a class="btn btn-lg" href="/dashboard">Go to dashboard</a>
+        }
+        else
+        {
+            <a class="btn btn-lg" href="/register">Start practising</a>
+            <a class="btn btn-ghost btn-lg" href="/login">I already have an account</a>
+        }
+    </div>
+</section>
+
+<div class="grid">
+    <div class="card">
+        <h3>Questions that fit the role</h3>
+        <p class="muted small">
+            Concepts, data, troubleshooting, design and testing - a different area each time, so one
+            session covers the ground a real interview would.
+        </p>
+    </div>
+    <div class="card">
+        <h3>Feedback you can act on</h3>
+        <p class="muted small">
+            Not a keyword match. The coach says what you got right, what you left out, and what a
+            stronger answer would have added.
+        </p>
+    </div>
+    <div class="card">
+        <h3>Your progress, kept</h3>
+        <p class="muted small">
+            Every finished interview stays in your history with its score, so you can see which
+            topics are improving and which are not.
+        </p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="row">
+        <div>
+            <h3>Want to look around first?</h3>
+            <p class="muted small" style="margin:0">
+                The demo account holds two finished interviews with real questions and feedback.
+            </p>
+        </div>
+        <a class="btn btn-ghost" href="/login?demo=1">View a sample interview</a>
+    </div>
+</div>

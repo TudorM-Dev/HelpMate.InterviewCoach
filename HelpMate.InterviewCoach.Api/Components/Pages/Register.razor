@@ -1,0 +1,92 @@
+﻿@page "/register"
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<PageTitle>Create account - HelpMate Interview Coach</PageTitle>
+
+<div class="form-narrow">
+    <div class="card">
+        <h1>Create your account</h1>
+        <p class="muted small">Takes a few seconds. You are signed in straight away.</p>
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-error">@_error</div>
+        }
+
+        <div class="field">
+            <label for="name">Display name</label>
+            <input id="name" @bind="_displayName" @bind:event="oninput" autocomplete="name" />
+        </div>
+
+        <div class="field">
+            <label for="email">Email</label>
+            <input id="email" @bind="_email" @bind:event="oninput" autocomplete="username" />
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" @bind="_password" @bind:event="oninput"
+                   autocomplete="new-password" @onkeydown="OnKeyDownAsync" />
+            <p class="dim small" style="margin:0.35rem 0 0">
+                At least 6 characters, with an uppercase letter, a digit and a symbol.
+            </p>
+        </div>
+
+        <button class="btn btn-lg" @onclick="SubmitAsync" disabled="@_busy" style="width:100%">
+            @if (_busy)
+            {
+                <span class="spinner"></span>
+                <span>Creating account...</span>
+            }
+            else
+            {
+                <span>Create account</span>
+            }
+        </button>
+
+        <p class="muted small" style="margin:1rem 0 0">
+            Already registered? <a href="/login">Sign in</a>.
+        </p>
+    </div>
+</div>
+
+@code {
+    private string _displayName = string.Empty;
+    private string _email = string.Empty;
+    private string _password = string.Empty;
+    private string? _error;
+    private bool _busy;
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await SubmitAsync();
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_busy)
+        {
+            return;
+        }
+
+        _busy = true;
+        _error = null;
+
+        var (ok, error) = await Api.RegisterAsync(_email, _password, _displayName);
+
+        _busy = false;
+
+        if (ok)
+        {
+            Nav.NavigateTo("/dashboard");
+        }
+        else
+        {
+            _error = error;
+        }
+    }
+}

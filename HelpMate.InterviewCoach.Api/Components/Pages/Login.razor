@@ -1,0 +1,101 @@
+﻿@page "/login"
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<PageTitle>Sign in - HelpMate Interview Coach</PageTitle>
+
+<div class="form-narrow">
+    <div class="card">
+        <h1>Sign in</h1>
+        <p class="muted small">Welcome back. Pick up where you left off.</p>
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-error">@_error</div>
+        }
+
+        @if (_isDemo)
+        {
+            <div class="alert alert-info">
+                Demo credentials are filled in for you. Sign in to browse two finished interviews.
+            </div>
+        }
+
+        <div class="field">
+            <label for="email">Email</label>
+            <input id="email" @bind="_email" @bind:event="oninput" autocomplete="username" />
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" @bind="_password" @bind:event="oninput"
+                   autocomplete="current-password" @onkeydown="OnKeyDownAsync" />
+        </div>
+
+        <button class="btn btn-lg" @onclick="SubmitAsync" disabled="@_busy" style="width:100%">
+            @if (_busy)
+            {
+                <span class="spinner"></span>
+                <span>Signing in...</span>
+            }
+            else
+            {
+                <span>Sign in</span>
+            }
+        </button>
+
+        <p class="muted small" style="margin:1rem 0 0">
+            No account yet? <a href="/register">Create one</a>.
+        </p>
+    </div>
+</div>
+
+@code {
+    private string _email = string.Empty;
+    private string _password = string.Empty;
+    private string? _error;
+    private bool _busy;
+    private bool _isDemo;
+
+    protected override void OnInitialized()
+    {
+        if (new Uri(Nav.Uri).Query.Contains("demo=1"))
+        {
+            _isDemo = true;
+            _email = "demo@helpmate.local";
+            _password = "Demo123!";
+        }
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await SubmitAsync();
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_busy)
+        {
+            return;
+        }
+
+        _busy = true;
+        _error = null;
+
+        var (ok, error) = await Api.LoginAsync(_email, _password);
+
+        _busy = false;
+
+        if (ok)
+        {
+            Nav.NavigateTo("/dashboard");
+        }
+        else
+        {
+            _error = error;
+        }
+    }
+}
