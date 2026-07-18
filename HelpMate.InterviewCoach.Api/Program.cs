@@ -1,4 +1,4 @@
-using System.Text;
+using HelpMate.InterviewCoach.Api.Data;
 using HelpMate.InterviewCoach.Core.Interfaces;
 using HelpMate.InterviewCoach.Core.Services;
 using HelpMate.InterviewCoach.Infrastructure.Data;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,11 @@ builder.Services.AddAuthentication(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    await RoleSeeder.SeedRolesAsync(scope.ServiceProvider);
+}
 
 if (app.Environment.IsDevelopment())
 {
