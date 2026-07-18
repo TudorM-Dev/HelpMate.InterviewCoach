@@ -10,6 +10,11 @@ public interface IInterviewRepository
 
     Task<int> CountSessionsCreatedSinceAsync(string userId, DateTime since, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Every session in the system, regardless of owner. Administrative use only.
+    /// </summary>
+    Task<IReadOnlyList<InterviewSession>> GetAllSessionsAsync(CancellationToken cancellationToken = default);
+
     Task AddSessionAsync(InterviewSession session, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);

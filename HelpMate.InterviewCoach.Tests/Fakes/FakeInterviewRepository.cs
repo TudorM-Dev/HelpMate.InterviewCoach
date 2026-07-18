@@ -27,6 +27,12 @@ public class FakeInterviewRepository : IInterviewRepository
         return Task.FromResult(_sessions.Count(s => s.UserId == userId && s.CreatedAt >= since));
     }
 
+    public Task<IReadOnlyList<InterviewSession>> GetAllSessionsAsync(CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<InterviewSession> result = _sessions.ToList();
+        return Task.FromResult(result);
+    }
+
     public Task AddSessionAsync(InterviewSession session, CancellationToken cancellationToken = default)
     {
         session.Id = _nextSessionId++;

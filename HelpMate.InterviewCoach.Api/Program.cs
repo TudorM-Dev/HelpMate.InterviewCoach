@@ -76,6 +76,8 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 using (var scope = app.Services.CreateScope())
 {
     await RoleSeeder.SeedRolesAsync(scope.ServiceProvider);
+    await RoleSeeder.SeedAdminAsync(scope.ServiceProvider, app.Configuration);
+    await DemoSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
 }
 
 if (app.Environment.IsDevelopment())

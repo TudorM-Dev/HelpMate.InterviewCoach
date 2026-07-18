@@ -37,6 +37,15 @@ public class EfInterviewRepository : IInterviewRepository
             .CountAsync(s => s.UserId == userId && s.CreatedAt >= since, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<InterviewSession>> GetAllSessionsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Sessions
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Answer)
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task AddSessionAsync(InterviewSession session, CancellationToken cancellationToken = default)
     {
         _context.Sessions.Add(session);
