@@ -35,3 +35,7 @@ Authorization: Bearer {{token}}
 
 ### Reject request without a token (expect 401)
 GET {{host}}/api/sessions
+
+### Session that does not exist (expect 404)
+GET {{host}}/api/sessions/9999
+Authorization: Bearer {{token}}

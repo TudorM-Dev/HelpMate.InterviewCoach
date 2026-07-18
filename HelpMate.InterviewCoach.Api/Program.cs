@@ -1,4 +1,5 @@
 using HelpMate.InterviewCoach.Api.Data;
+using HelpMate.InterviewCoach.Api.Middleware;
 using HelpMate.InterviewCoach.Core.Interfaces;
 using HelpMate.InterviewCoach.Core.Services;
 using HelpMate.InterviewCoach.Infrastructure.Data;
@@ -10,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -53,6 +55,9 @@ builder.Services.AddAuthentication(options =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 
 using (var scope = app.Services.CreateScope())
 {
