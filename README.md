@@ -33,18 +33,17 @@ five minutes. The demo account is seeded with two finished interviews you can br
 
 ---
 
-<!--
-  SCREENSHOTS - add your own:
-  1. Run the app, press Win+Shift+S, capture the landing page, the dashboard and a transcript.
-  2. Save them as docs/landing.png, docs/dashboard.png, docs/transcript.png
-  3. Delete this comment and uncomment the block below.
+## Screenshots
 
-  ## Screenshots
+**Your history, with scores over time**
 
-  | Landing | Dashboard | Transcript |
-  | --- | --- | --- |
-  | ![Landing](docs/landing.png) | ![Dashboard](docs/dashboard.png) | ![Transcript](docs/transcript.png) |
--->
+![Dashboard](docs/dashboard.png)
+
+**A finished interview: question, your answer, the coach's verdict**
+
+![Transcript](docs/transcript.png)
+
+---
 
 ## What this project demonstrates
 
