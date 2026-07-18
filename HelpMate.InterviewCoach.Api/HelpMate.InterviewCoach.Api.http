@@ -1,17 +1,7 @@
 @host = https://localhost:7163
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MzA3Y2U5MS1kMDYwLTQyNmUtYjQ2YS05NTE3NDQ1N2Q0MmEiLCJlbWFpbCI6InR1ZG9yQHRlc3QuY29tIiwianRpIjoiM2Y3OWExMmMtNWYzNS00NDRmLWEzMDAtNzViYWY3MjFlNDg2IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc4NDM4ODA2OCwiaXNzIjoiSGVscE1hdGUuSW50ZXJ2aWV3Q29hY2giLCJhdWQiOiJIZWxwTWF0ZS5JbnRlcnZpZXdDb2FjaCJ9.M3qi0yQDZpR0NmFESC4S2vivYxHdY7fM0k4lw2yH5Y8
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MzA3Y2U5MS1kMDYwLTQyNmUtYjQ2YS05NTE3NDQ1N2Q0MmEiLCJlbWFpbCI6InR1ZG9yQHRlc3QuY29tIiwianRpIjoiNmQ3NTc1ZGItMjc4MC00NzRhLWE1MGItNmQ4NGE4MzI5YmYxIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc4NDQwODA1NSwiaXNzIjoiSGVscE1hdGUuSW50ZXJ2aWV3Q29hY2giLCJhdWQiOiJIZWxwTWF0ZS5JbnRlcnZpZXdDb2FjaCJ9.Tv8KwDkE4kZJxc00kUV6v6LfwjLHygpxZ1qAndpwkFM
 
-### Register a new user
-POST {{host}}/api/auth/register
-Content-Type: application/json
-
-{
-  "email": "tudor@test.com",
-  "password": "Test123!",
-  "displayName": "Tudor"
-}
-
-### Login with the same user
+### Login (run this first, then paste the token above)
 POST {{host}}/api/auth/login
 Content-Type: application/json
 
@@ -20,7 +10,7 @@ Content-Type: application/json
   "password": "Test123!"
 }
 
-### Create a session
+### 1. Create a session
 POST {{host}}/api/sessions
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -29,13 +19,20 @@ Authorization: Bearer {{token}}
   "targetRole": ".NET Backend Junior"
 }
 
-### List my sessions
-GET {{host}}/api/sessions
+### 2. Let the agent ask the first question
+POST {{host}}/api/sessions/1/advance
 Authorization: Bearer {{token}}
 
-### Reject request without a token (expect 401)
-GET {{host}}/api/sessions
+### 3. Answer the question (put the real question id)
+POST {{host}}/api/sessions/1/answers
+Content-Type: application/json
+Authorization: Bearer {{token}}
 
-### Session that does not exist (expect 404)
-GET {{host}}/api/sessions/9999
+{
+  "questionId": 1,
+  "text": "An index speeds up SELECT queries by letting the database find rows without scanning the whole table. The trade-off is that INSERT and UPDATE get slower, because the index has to be maintained too."
+}
+
+### 4. Let the agent evaluate and ask the next one
+POST {{host}}/api/sessions/1/advance
 Authorization: Bearer {{token}}

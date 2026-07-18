@@ -4,6 +4,8 @@ namespace HelpMate.InterviewCoach.Api.Contracts;
 
 public record CreateSessionRequest(string TargetRole);
 
+public record SubmitAnswerRequest(int QuestionId, string Text);
+
 public record SessionSummaryResponse(
     int Id,
     string TargetRole,

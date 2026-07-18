@@ -2,12 +2,14 @@ using HelpMate.InterviewCoach.Api.Data;
 using HelpMate.InterviewCoach.Api.Middleware;
 using HelpMate.InterviewCoach.Core.Interfaces;
 using HelpMate.InterviewCoach.Core.Services;
+using HelpMate.InterviewCoach.Infrastructure.Ai;
 using HelpMate.InterviewCoach.Infrastructure.Data;
 using HelpMate.InterviewCoach.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OllamaSharp;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +55,18 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
     };
 });
+
+builder.Services.AddSingleton<IOllamaApiClient>(_ =>
+{
+    var httpClient = new HttpClient
+    {
+        BaseAddress = new Uri(builder.Configuration["Ollama:Endpoint"] ?? "http://localhost:11434"),
+        Timeout = TimeSpan.FromMinutes(5)
+    };
+
+    return new OllamaApiClient(httpClient, builder.Configuration["Ollama:Model"] ?? "qwen2.5:7b");
+});
+builder.Services.AddScoped<IAiInterviewer, OllamaInterviewer>();
 
 var app = builder.Build();
 

@@ -1,9 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using HelpMate.InterviewCoach.Api.Contracts;
+﻿using HelpMate.InterviewCoach.Api.Contracts;
 using HelpMate.InterviewCoach.Core.Entities;
+using HelpMate.InterviewCoach.Core.Interfaces;
 using HelpMate.InterviewCoach.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace HelpMate.InterviewCoach.Api.Controllers;
 
@@ -13,10 +14,12 @@ namespace HelpMate.InterviewCoach.Api.Controllers;
 public class SessionsController : ControllerBase
 {
     private readonly InterviewService _interviewService;
+    private readonly IAiInterviewer _aiInterviewer;
 
-    public SessionsController(InterviewService interviewService)
+    public SessionsController(InterviewService interviewService, IAiInterviewer aiInterviewer)
     {
         _interviewService = interviewService;
+        _aiInterviewer = aiInterviewer;
     }
 
     private string CurrentUserId =>
@@ -48,6 +51,28 @@ public class SessionsController : ControllerBase
     {
         var session = await _interviewService.GetOwnedSessionAsync(id, CurrentUserId, cancellationToken);
 
+        return Ok(ToDetail(session));
+    }
+
+    [HttpPost("{id:int}/advance")]
+    public async Task<IActionResult> Advance(int id, CancellationToken cancellationToken)
+    {
+        await _aiInterviewer.AdvanceSessionAsync(id, CurrentUserId, cancellationToken);
+
+        var session = await _interviewService.GetOwnedSessionAsync(id, CurrentUserId, cancellationToken);
+        return Ok(ToDetail(session));
+    }
+
+    [HttpPost("{id:int}/answers")]
+    public async Task<IActionResult> SubmitAnswer(
+        int id,
+        SubmitAnswerRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _interviewService.SubmitAnswerAsync(
+            id, CurrentUserId, request.QuestionId, request.Text, cancellationToken);
+
+        var session = await _interviewService.GetOwnedSessionAsync(id, CurrentUserId, cancellationToken);
         return Ok(ToDetail(session));
     }
 
