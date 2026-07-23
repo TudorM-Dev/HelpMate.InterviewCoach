@@ -13,6 +13,7 @@ public interface IInterviewRepository
     Task<IReadOnlyList<InterviewSession>> GetAllSessionsAsync(CancellationToken cancellationToken = default);
 
     Task AddSessionAsync(InterviewSession session, CancellationToken cancellationToken = default);
+    Task RemoveSessionAsync(InterviewSession session, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

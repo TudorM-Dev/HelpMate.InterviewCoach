@@ -9,6 +9,7 @@ public record SubmitAnswerRequest(int QuestionId, string Text);
 public record SessionSummaryResponse(
     int Id,
     string TargetRole,
+    InterviewDifficulty Difficulty,
     InterviewSessionStatus Status,
     DateTime CreatedAt,
     DateTime? CompletedAt,
@@ -18,6 +19,7 @@ public record SessionSummaryResponse(
 public record SessionDetailResponse(
     int Id,
     string TargetRole,
+    InterviewDifficulty Difficulty,
     InterviewSessionStatus Status,
     DateTime CreatedAt,
     DateTime? CompletedAt,

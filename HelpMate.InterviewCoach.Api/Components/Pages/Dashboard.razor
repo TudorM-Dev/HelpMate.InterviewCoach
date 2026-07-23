@@ -107,6 +107,7 @@ else
                 <div class="row">
                     <div>
                         <strong>@session.TargetRole</strong>
+                        <span class="badge" style="margin-left:0.5rem">@session.Difficulty</span>
                         <div class="dim small">
                             <span class="mono">@session.CreatedAt.ToLocalTime().ToString("d MMM yyyy")</span>
                             &middot; @session.QuestionCount question@(session.QuestionCount == 1 ? "" : "s")

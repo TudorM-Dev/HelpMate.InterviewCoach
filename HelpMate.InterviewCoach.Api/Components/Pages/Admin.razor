@@ -1,6 +1,7 @@
 @page "/admin"
 @inject ApiClient Api
 @inject AuthState Auth
+@inject IJSRuntime JS
 
 <PageTitle>Admin - HelpMate Interview Coach</PageTitle>
 
@@ -93,6 +94,7 @@ else
                         <th>Started</th>
                         <th>Status</th>
                         <th>Score</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,6 +110,19 @@ else
                                 </span>
                             </td>
                             <td class="@ScoreDisplay.CssClass(session.AverageScore)">@(session.AverageScore?.ToString("0.0") ?? "-")</td>
+                            <td style="text-align:right">
+                                <button class="btn btn-danger small" @onclick="() => DeleteAsync(session)"
+                                        disabled="@(_deletingId == session.Id)">
+                                    @if (_deletingId == session.Id)
+                                    {
+                                        <span class="spinner"></span>
+                                    }
+                                    else
+                                    {
+                                        <span>Delete</span>
+                                    }
+                                </button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -120,6 +135,7 @@ else
     private AdminStatsResponse? _stats;
     private IReadOnlyList<AdminUserResponse> _users = [];
     private IReadOnlyList<AdminSessionResponse> _sessions = [];
+    private int? _deletingId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -128,6 +144,30 @@ else
             _stats = await Api.GetAdminStatsAsync();
             _users = await Api.GetAdminUsersAsync();
             _sessions = await Api.GetAdminSessionsAsync();
+        }
+    }
+
+    private async Task DeleteAsync(AdminSessionResponse session)
+    {
+        var message = $"Delete the \"{session.TargetRole}\" interview from {session.UserEmail}? "
+                    + "This also deletes its questions and answers, and cannot be undone.";
+
+        if (!await JS.InvokeAsync<bool>("confirm", message))
+        {
+            return;
+        }
+
+        _deletingId = session.Id;
+
+        var deleted = await Api.DeleteAdminSessionAsync(session.Id);
+
+        _deletingId = null;
+
+        if (deleted)
+        {
+            _sessions = _sessions.Where(s => s.Id != session.Id).ToList();
+            _stats = await Api.GetAdminStatsAsync();
+            _users = await Api.GetAdminUsersAsync();
         }
     }
 }

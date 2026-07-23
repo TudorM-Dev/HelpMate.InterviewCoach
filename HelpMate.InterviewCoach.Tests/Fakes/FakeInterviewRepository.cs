@@ -40,6 +40,12 @@ public class FakeInterviewRepository : IInterviewRepository
         return Task.CompletedTask;
     }
 
+    public Task RemoveSessionAsync(InterviewSession session, CancellationToken cancellationToken = default)
+    {
+        _sessions.Remove(session);
+        return Task.CompletedTask;
+    }
+
     public Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         SaveChangesCallCount++;

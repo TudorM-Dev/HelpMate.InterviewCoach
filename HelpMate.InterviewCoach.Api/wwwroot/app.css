@@ -264,6 +264,18 @@ p { margin: 0 0 1rem; }
 
 .btn-lg { padding: 0.55rem 1.35rem; min-height: 38px; }
 
+.btn-danger {
+    background: var(--control);
+    border-color: var(--stroke-strong);
+    color: var(--low);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: rgba(255, 153, 164, 0.12);
+    border-color: rgba(255, 153, 164, 0.4);
+    color: var(--low);
+}
+
 .btn-chip {
     background: var(--control);
     border: 1px solid var(--stroke);

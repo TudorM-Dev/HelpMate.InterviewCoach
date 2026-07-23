@@ -113,6 +113,12 @@ public class ApiClient
     public Task<IReadOnlyList<AdminSessionResponse>> GetAdminSessionsAsync() =>
         GetAsync<IReadOnlyList<AdminSessionResponse>>("/api/admin/sessions", []);
 
+    public async Task<bool> DeleteAdminSessionAsync(int sessionId)
+    {
+        var response = await SendAsync(HttpMethod.Delete, $"/api/admin/sessions/{sessionId}", null);
+        return response.IsSuccessStatusCode;
+    }
+
     public Task<AdminStatsResponse?> GetAdminStatsAsync() =>
         GetAsync<AdminStatsResponse?>("/api/admin/stats", null);
 

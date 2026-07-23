@@ -93,6 +93,22 @@ public class AdminController : ControllerBase
             scores.Count == 0 ? null : Math.Round(scores.Average(), 2)));
     }
 
+    [HttpDelete("sessions/{id:int}")]
+    public async Task<IActionResult> DeleteSession(int id, CancellationToken cancellationToken)
+    {
+        var session = await _repository.GetSessionAsync(id, cancellationToken);
+
+        if (session is null)
+        {
+            return NotFound();
+        }
+
+        await _repository.RemoveSessionAsync(session, cancellationToken);
+        await _repository.SaveChangesAsync(cancellationToken);
+
+        return NoContent();
+    }
+
     private static double? AverageScore(InterviewSession session)
     {
         var scores = session.Questions

@@ -52,6 +52,12 @@ public class EfInterviewRepository : IInterviewRepository
         return Task.CompletedTask;
     }
 
+    public Task RemoveSessionAsync(InterviewSession session, CancellationToken cancellationToken = default)
+    {
+        _context.Sessions.Remove(session);
+        return Task.CompletedTask;
+    }
+
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         await _context.SaveChangesAsync(cancellationToken);

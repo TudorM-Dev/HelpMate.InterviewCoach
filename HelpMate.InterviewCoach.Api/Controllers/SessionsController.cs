@@ -79,6 +79,7 @@ public class SessionsController : ControllerBase
     private static SessionSummaryResponse ToSummary(InterviewSession session) => new(
         session.Id,
         session.TargetRole,
+        session.Difficulty,
         session.Status,
         session.CreatedAt,
         session.CompletedAt,
@@ -88,6 +89,7 @@ public class SessionsController : ControllerBase
     private static SessionDetailResponse ToDetail(InterviewSession session) => new(
         session.Id,
         session.TargetRole,
+        session.Difficulty,
         session.Status,
         session.CreatedAt,
         session.CompletedAt,

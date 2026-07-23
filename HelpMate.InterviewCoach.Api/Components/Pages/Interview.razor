@@ -24,6 +24,7 @@ else
             <p class="eyebrow">In progress</p>
             <h1>@_session.TargetRole</h1>
             <p class="muted small meta">
+                <span class="badge" style="margin-right:0.4rem">@_session.Difficulty</span>
                 Question <span class="mono">@_session.Questions.Count</span> of <span class="mono">@MaxQuestions</span>
                 @if (_session.AverageScore is not null)
                 {
