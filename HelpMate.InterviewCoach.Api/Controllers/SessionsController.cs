@@ -30,7 +30,7 @@ public class SessionsController : ControllerBase
     public async Task<IActionResult> CreateSession(CreateSessionRequest request, CancellationToken cancellationToken)
     {
         var session = await _interviewService.CreateSessionAsync(
-            CurrentUserId, request.TargetRole, cancellationToken);
+            CurrentUserId, request.TargetRole, request.Difficulty, cancellationToken);
 
         return CreatedAtAction(
             nameof(GetSession),

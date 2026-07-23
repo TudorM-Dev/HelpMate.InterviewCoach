@@ -16,6 +16,7 @@ public class InterviewService
     public async Task<InterviewSession> CreateSessionAsync(
         string userId,
         string targetRole,
+        InterviewDifficulty difficulty = InterviewDifficulty.Junior,
         CancellationToken cancellationToken = default)
     {
         var startOfDay = DateTime.UtcNow.Date;
@@ -33,6 +34,7 @@ public class InterviewService
         {
             UserId = userId,
             TargetRole = targetRole,
+            Difficulty = difficulty,
             Status = InterviewSessionStatus.InProgress,
             CreatedAt = DateTime.UtcNow
         };

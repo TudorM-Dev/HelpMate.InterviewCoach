@@ -2,7 +2,7 @@
 
 namespace HelpMate.InterviewCoach.Api.Contracts;
 
-public record CreateSessionRequest(string TargetRole);
+public record CreateSessionRequest(string TargetRole, InterviewDifficulty Difficulty = InterviewDifficulty.Junior);
 
 public record SubmitAnswerRequest(int QuestionId, string Text);
 
