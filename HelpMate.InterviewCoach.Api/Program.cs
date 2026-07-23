@@ -1,3 +1,4 @@
+using Anthropic;
 using HelpMate.InterviewCoach.Api.Components;
 using HelpMate.InterviewCoach.Api.Data;
 using HelpMate.InterviewCoach.Api.Middleware;
@@ -90,17 +91,33 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddSingleton<IOllamaApiClient>(_ =>
-{
-    var httpClient = new HttpClient
-    {
-        BaseAddress = new Uri(builder.Configuration["Ollama:Endpoint"] ?? "http://localhost:11434"),
-        Timeout = TimeSpan.FromMinutes(5)
-    };
+var aiProvider = builder.Configuration["Ai:Provider"] ?? "Ollama";
 
-    return new OllamaApiClient(httpClient, builder.Configuration["Ollama:Model"] ?? "qwen2.5:7b");
-});
-builder.Services.AddScoped<IAiInterviewer, OllamaInterviewer>();
+if (aiProvider.Equals("Claude", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddSingleton(_ => new AnthropicClient
+    {
+        ApiKey = builder.Configuration["Anthropic:ApiKey"]
+            ?? throw new InvalidOperationException("Anthropic:ApiKey is not configured.")
+    });
+
+    builder.Services.AddScoped<IAiInterviewer, ClaudeInterviewer>();
+}
+else
+{
+    builder.Services.AddSingleton<IOllamaApiClient>(_ =>
+    {
+        var httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(builder.Configuration["Ollama:Endpoint"] ?? "http://localhost:11434"),
+            Timeout = TimeSpan.FromMinutes(5)
+        };
+
+        return new OllamaApiClient(httpClient, builder.Configuration["Ollama:Model"] ?? "qwen2.5:7b");
+    });
+
+    builder.Services.AddScoped<IAiInterviewer, OllamaInterviewer>();
+}
 
 var app = builder.Build();
 
