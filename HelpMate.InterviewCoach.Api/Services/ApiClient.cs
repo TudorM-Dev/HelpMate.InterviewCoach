@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using HelpMate.InterviewCoach.Api.Contracts;
+using HelpMate.InterviewCoach.Core.Entities;
 
 namespace HelpMate.InterviewCoach.Api.Services;
 
@@ -66,10 +67,11 @@ public class ApiClient
     public Task<SessionDetailResponse?> GetSessionAsync(int id) =>
         GetAsync<SessionDetailResponse?>($"/api/sessions/{id}", null);
 
-    public async Task<(SessionSummaryResponse? Session, string? Error)> CreateSessionAsync(string targetRole)
+    public async Task<(SessionSummaryResponse? Session, string? Error)> CreateSessionAsync(
+        string targetRole, InterviewDifficulty difficulty)
     {
         var response = await SendAsync(HttpMethod.Post, "/api/sessions",
-            JsonContent.Create(new CreateSessionRequest(targetRole), options: JsonOptions));
+            JsonContent.Create(new CreateSessionRequest(targetRole, difficulty), options: JsonOptions));
 
         if (!response.IsSuccessStatusCode)
         {

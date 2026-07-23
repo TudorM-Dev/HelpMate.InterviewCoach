@@ -33,7 +33,7 @@ else
 
     <div class="card">
         <h3>Start a new interview</h3>
-        <p class="muted small">Name the role you are preparing for. The coach adapts its questions to it.</p>
+        <p class="muted small">Name the role you are preparing for and pick your level. The coach adapts its questions and scoring to both.</p>
 
         @if (_error is not null)
         {
@@ -44,6 +44,15 @@ else
             <div style="flex:1; min-width:16rem">
                 <label for="role">Target role</label>
                 <input id="role" @bind="_targetRole" placeholder=".NET Backend Junior" />
+            </div>
+            <div style="min-width:11rem">
+                <label for="difficulty">Level</label>
+                <select id="difficulty" @bind="_difficulty">
+                    <option value="@InterviewDifficulty.Internship">Internship</option>
+                    <option value="@InterviewDifficulty.Junior">Junior</option>
+                    <option value="@InterviewDifficulty.Mid">Mid</option>
+                    <option value="@InterviewDifficulty.Senior">Senior</option>
+                </select>
             </div>
             <button class="btn" @onclick="StartAsync" disabled="@(_busy || string.IsNullOrWhiteSpace(_targetRole))">
                 @if (_busy)
@@ -126,6 +135,7 @@ else
     private IReadOnlyList<SessionSummaryResponse> _sessions = [];
     private List<SessionSummaryResponse> _scored = [];
     private string _targetRole = string.Empty;
+    private InterviewDifficulty _difficulty = InterviewDifficulty.Internship;
     private string? _error;
     private bool _busy;
     private bool _loading = true;
@@ -155,7 +165,7 @@ else
         _busy = true;
         _error = null;
 
-        var (session, error) = await Api.CreateSessionAsync(_targetRole.Trim());
+        var (session, error) = await Api.CreateSessionAsync(_targetRole.Trim(), _difficulty);
 
         _busy = false;
 
