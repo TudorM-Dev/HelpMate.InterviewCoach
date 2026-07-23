@@ -205,6 +205,9 @@ public abstract class InterviewerBase<TConversation> : IAiInterviewer
     private static string BuildSystemPrompt(InterviewSession session) =>
         $"""
         You are conducting a technical job interview for the role: {session.TargetRole}.
+        Target candidate level: {session.Difficulty}.
+
+        {DifficultyGuidance(session.Difficulty)}
 
         You act only through tools. Never write a question or feedback as plain text.
 
@@ -214,13 +217,40 @@ public abstract class InterviewerBase<TConversation> : IAiInterviewer
         - {InterviewTools.CompleteSession}: close the interview.
 
         The user message tells you exactly which action to take. Follow it precisely.
+        When it names a focus area for the next question, interpret that area at the target
+        level above and never go beyond it.
 
         Quality rules:
-        - Ask questions suited to the role: mix concepts, practical scenarios and problem solving.
+        - Ask questions suited to the role and the target level.
         - Never repeat a question that was already asked.
-        - Score answers from 0 to 10. Be fair but honest.
+        - Score answers from 0 to 10, relative to the target level: a strong answer for this
+          level scores high even if a more senior candidate could go deeper.
         - Feedback must be concrete: say what was correct and what was missing or wrong.
         """;
+
+    private static string DifficultyGuidance(InterviewDifficulty difficulty) => difficulty switch
+    {
+        InterviewDifficulty.Internship =>
+            "The candidate is a student applying for an internship. Ask only fundamentals: what a "
+            + "concept is, why it exists, and simple 'which one would you use here' questions. No "
+            + "system design, no scaling, no performance tuning, no obscure edge cases. A good answer "
+            + "at this level is a clear explanation in plain words, not production experience.",
+
+        InterviewDifficulty.Junior =>
+            "The candidate has up to about two years of experience. Ask core concepts and everyday "
+            + "practical situations they would actually meet on the job. Light trade-offs are fine; "
+            + "avoid architecture and scaling questions.",
+
+        InterviewDifficulty.Mid =>
+            "The candidate has several years of experience. Ask applied problem solving, trade-offs "
+            + "and design decisions where more than one answer is reasonable.",
+
+        InterviewDifficulty.Senior =>
+            "The candidate is senior. Ask about architecture, scaling, failure modes and judgement "
+            + "calls, and expect them to justify their trade-offs.",
+
+        _ => string.Empty
+    };
 
     private static string DescribeSessionState(InterviewSession session)
     {
