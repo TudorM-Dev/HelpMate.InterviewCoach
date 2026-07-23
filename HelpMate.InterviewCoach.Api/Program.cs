@@ -126,6 +126,9 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {
+    var db = scope.ServiceProvider.GetRequiredService<InterviewDbContext>();
+    await db.Database.MigrateAsync();
+
     await RoleSeeder.SeedRolesAsync(scope.ServiceProvider);
     await RoleSeeder.SeedAdminAsync(scope.ServiceProvider, app.Configuration);
     await DemoSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
