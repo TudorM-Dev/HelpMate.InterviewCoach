@@ -264,17 +264,12 @@ public abstract class InterviewerBase<TConversation> : IAiInterviewer
             {
                 state.AppendLine($"[question id {question.Id}] {question.Text}");
 
-                if (question.Answer is null)
+                state.AppendLine(question.Answer switch
                 {
-                    state.AppendLine("    not answered yet");
-                }
-                else
-                {
-                    state.AppendLine($"    candidate answered: \"{question.Answer.Text}\"");
-                    state.AppendLine(question.Answer.Score is null
-                        ? "    NOT EVALUATED YET"
-                        : $"    already evaluated with score {question.Answer.Score}");
-                }
+                    null => "    not answered yet",
+                    { Score: null } => "    answered, not evaluated yet",
+                    var answer => $"    answered, scored {answer.Score}/10"
+                });
             }
 
             state.AppendLine();
