@@ -16,6 +16,8 @@ public class InterviewSessionConfiguration : IEntityTypeConfiguration<InterviewS
         builder.Property(s => s.TargetRole)
             .IsRequired()
             .HasMaxLength(200);
+        builder.Property(s => s.Difficulty)
+            .HasDefaultValue(InterviewDifficulty.Junior);
 
         builder.HasMany(s => s.Questions)
             .WithOne(q => q.Session)

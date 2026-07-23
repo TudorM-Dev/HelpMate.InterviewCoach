@@ -5,6 +5,7 @@ public class InterviewSession
     public int Id { get; set; }
     public string UserId { get; set; } = null!;
     public string TargetRole { get; set; } = null!;
+    public InterviewDifficulty Difficulty { get; set; }
     public InterviewSessionStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
