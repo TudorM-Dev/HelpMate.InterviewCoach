@@ -1,4 +1,4 @@
-﻿@page "/admin"
+@page "/admin"
 @inject ApiClient Api
 @inject AuthState Auth
 
@@ -21,8 +21,12 @@ else if (!Auth.IsAdmin)
 }
 else
 {
-    <h1>Administration</h1>
-    <p class="muted small">Everything across every account.</p>
+    <div class="page-head">
+        <div>
+            <p class="eyebrow">Administration</p>
+            <h1>Everything, everyone</h1>
+        </div>
+    </div>
 
     @if (_stats is not null)
     {
@@ -40,7 +44,7 @@ else
                 <div class="stat-label">Completed</div>
             </div>
             <div class="card">
-                <div class="stat-value">@(_stats.AverageScore?.ToString("0.0") ?? "-")</div>
+                <div class="stat-value @ScoreDisplay.CssClass(_stats.AverageScore)">@(_stats.AverageScore?.ToString("0.0") ?? "-")</div>
                 <div class="stat-label">Average score</div>
             </div>
         </div>
@@ -70,7 +74,7 @@ else
                                     <span class="badge @(role == "Admin" ? "badge-live" : "")">@role</span>
                                 }
                             </td>
-                            <td>@user.SessionCount</td>
+                            <td class="mono">@user.SessionCount</td>
                         </tr>
                     }
                 </tbody>
@@ -97,13 +101,13 @@ else
                         <tr>
                             <td>@session.TargetRole</td>
                             <td class="muted">@session.UserEmail</td>
-                            <td class="dim">@session.CreatedAt.ToLocalTime().ToString("d MMM, HH:mm")</td>
+                            <td class="dim mono">@session.CreatedAt.ToLocalTime().ToString("d MMM, HH:mm")</td>
                             <td>
                                 <span class="badge @(session.Status == InterviewSessionStatus.Completed ? "" : "badge-live")">
                                     @(session.Status == InterviewSessionStatus.Completed ? "Completed" : "In progress")
                                 </span>
                             </td>
-                            <td class="score">@(session.AverageScore?.ToString("0.0") ?? "-")</td>
+                            <td class="@ScoreDisplay.CssClass(session.AverageScore)">@(session.AverageScore?.ToString("0.0") ?? "-")</td>
                         </tr>
                     }
                 </tbody>

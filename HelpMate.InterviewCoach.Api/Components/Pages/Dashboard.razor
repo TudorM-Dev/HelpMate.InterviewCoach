@@ -1,4 +1,4 @@
-﻿@page "/dashboard"
+@page "/dashboard"
 @inject ApiClient Api
 @inject AuthState Auth
 @inject NavigationManager Nav
@@ -15,25 +15,26 @@
 }
 else
 {
-    <div class="row" style="margin-bottom:1.25rem">
+    <div class="page-head">
         <div>
-            <h1>Your interviews</h1>
-            <p class="muted small" style="margin:0">
-                @if (_sessions.Count == 0)
-                {
-                    <span>Nothing here yet. Start your first interview below.</span>
-                }
-                else
-                {
-                    <span>@_sessions.Count session@(_sessions.Count == 1 ? "" : "s") so far.</span>
-                }
-            </p>
+            <p class="eyebrow">Your practice</p>
+            <h1>Interviews</h1>
         </div>
+        <p class="muted small meta">
+            @if (_sessions.Count == 0)
+            {
+                <span>Nothing here yet — start your first one below.</span>
+            }
+            else
+            {
+                <span><span class="mono">@_sessions.Count</span> session@(_sessions.Count == 1 ? "" : "s") so far</span>
+            }
+        </p>
     </div>
 
     <div class="card">
         <h3>Start a new interview</h3>
-        <p class="muted small">Name the role you are preparing for and pick your level. The coach adapts its questions and scoring to both.</p>
+        <p class="muted small">Name the role you are preparing for and pick your level. The coach adapts its questions and its marking to both.</p>
 
         @if (_error is not null)
         {
@@ -41,11 +42,11 @@ else
         }
 
         <div class="actions" style="align-items:flex-end">
-            <div style="flex:1; min-width:16rem">
+            <div style="flex:1; min-width:15rem">
                 <label for="role">Target role</label>
-                <input id="role" @bind="_targetRole" placeholder=".NET Backend Junior" />
+                <input id="role" @bind="_targetRole" @bind:event="oninput" placeholder=".NET Backend" />
             </div>
-            <div style="min-width:11rem">
+            <div style="min-width:10rem">
                 <label for="difficulty">Level</label>
                 <select id="difficulty" @bind="_difficulty">
                     <option value="@InterviewDifficulty.Internship">Internship</option>
@@ -67,10 +68,10 @@ else
             </button>
         </div>
 
-        <div class="actions" style="margin-top:0.75rem">
+        <div class="actions" style="margin-top:0.9rem">
             @foreach (var suggestion in Suggestions)
             {
-                <button class="btn btn-ghost small" @onclick="() => _targetRole = suggestion">@suggestion</button>
+                <button class="btn btn-chip" @onclick="() => _targetRole = suggestion">@suggestion</button>
             }
         </div>
     </div>
@@ -78,7 +79,7 @@ else
     @if (_scored.Count > 1)
     {
         <div class="card">
-            <h3>Your scores over time</h3>
+            <h3>Scores over time</h3>
             <div class="trend">
                 @foreach (var session in _scored)
                 {
@@ -87,7 +88,7 @@ else
                         <div class="trend-bar">
                             <div class="trend-fill" style="width:@((session.AverageScore ?? 0) * 10)%"></div>
                         </div>
-                        <span class="score">@session.AverageScore?.ToString("0.0")</span>
+                        <span class="@ScoreDisplay.CssClass(session.AverageScore)">@session.AverageScore?.ToString("0.0")</span>
                     </div>
                 }
             </div>
@@ -107,14 +108,14 @@ else
                     <div>
                         <strong>@session.TargetRole</strong>
                         <div class="dim small">
-                            @session.CreatedAt.ToLocalTime().ToString("d MMM yyyy, HH:mm")
+                            <span class="mono">@session.CreatedAt.ToLocalTime().ToString("d MMM yyyy")</span>
                             &middot; @session.QuestionCount question@(session.QuestionCount == 1 ? "" : "s")
                         </div>
                     </div>
-                    <div style="text-align:right">
+                    <div class="actions" style="align-items:center; flex-wrap:nowrap">
                         @if (session.AverageScore is not null)
                         {
-                            <div class="score">@session.AverageScore.Value.ToString("0.0") / 10</div>
+                            <span class="@ScoreDisplay.CssClass(session.AverageScore)">@session.AverageScore.Value.ToString("0.0") / 10</span>
                         }
                         <span class="badge @(session.Status == InterviewSessionStatus.Completed ? "" : "badge-live")">
                             @(session.Status == InterviewSessionStatus.Completed ? "Completed" : "In progress")
@@ -129,7 +130,7 @@ else
 @code {
     private static readonly string[] Suggestions =
     [
-        ".NET Backend Junior", "SQL & Databases", "Frontend React", "System Design Basics"
+        ".NET Backend", "C# Fundamentals", "SQL & Databases", "Frontend React"
     ];
 
     private IReadOnlyList<SessionSummaryResponse> _sessions = [];

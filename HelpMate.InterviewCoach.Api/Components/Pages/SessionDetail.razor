@@ -1,4 +1,4 @@
-﻿@page "/sessions/{SessionId:int}"
+@page "/sessions/{SessionId:int}"
 @inject ApiClient Api
 @inject AuthState Auth
 
@@ -25,15 +25,16 @@ else if (_session is null)
 }
 else
 {
-    <div class="row" style="margin-bottom:1.25rem">
+    <div class="page-head">
         <div>
+            <p class="eyebrow">Transcript</p>
             <h1>@_session.TargetRole</h1>
-            <p class="muted small" style="margin:0">
-                @_session.CreatedAt.ToLocalTime().ToString("d MMMM yyyy, HH:mm")
+            <p class="muted small meta">
+                <span class="mono">@_session.CreatedAt.ToLocalTime().ToString("d MMMM yyyy, HH:mm")</span>
                 &middot; @_session.Questions.Count questions
                 @if (_session.AverageScore is not null)
                 {
-                    <span>&middot; average <span class="score">@_session.AverageScore.Value.ToString("0.0") / 10</span></span>
+                    <span>&middot; average <span class="@ScoreDisplay.CssClass(_session.AverageScore)">@_session.AverageScore.Value.ToString("0.0") / 10</span></span>
                 }
             </p>
         </div>
@@ -48,12 +49,14 @@ else
 
     @foreach (var question in _session.Questions.OrderBy(q => q.Order))
     {
-        <div class="card qa @(question.Answer?.Score is not null ? "evaluated" : "")">
+        <div class="qa @(question.Answer?.Score is not null ? "evaluated" : "")">
+            <div class="qa-number">@question.Order</div>
+
             <div class="qa-head">
-                <span class="qa-number">Question @question.Order</span>
+                <span class="dim small">Question @question.Order</span>
                 @if (question.Answer?.Score is not null)
                 {
-                    <span class="score">@question.Answer.Score / 10</span>
+                    <span class="@ScoreDisplay.CssClass(question.Answer.Score)">@question.Answer.Score / 10</span>
                 }
             </div>
 
