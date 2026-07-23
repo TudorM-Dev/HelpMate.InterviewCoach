@@ -2,6 +2,7 @@
 @inject ApiClient Api
 @inject AuthState Auth
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <PageTitle>Interview - HelpMate Interview Coach</PageTitle>
 
@@ -110,16 +111,14 @@ else
     @if (_session.Status != InterviewSessionStatus.Completed && !_session.Questions.Any(q => q.Answer is null))
     {
         <div class="card">
-            <p class="muted" style="margin:0 0 1rem">
-                @if (_session.Questions.Count == 0)
-                {
-                    <span>Ready when you are.</span>
-                }
-                else
-                {
-                    <span>Answer reviewed. Continue when you are ready.</span>
-                }
-            </p>
+            @if (!_busy)
+            {
+                <p class="muted" style="margin:0 0 1rem">
+                    @(_session.Questions.Count == 0
+                        ? "Click below to get your first question."
+                        : "Answer reviewed. Continue when you're ready.")
+                </p>
+            }
 
             <button class="btn btn-lg" @onclick="AdvanceAsync" disabled="@_busy">
                 @if (_busy)
@@ -174,6 +173,8 @@ else
         }
 
         _busy = false;
+
+        await ScrollToTopIfCompletedAsync();
     }
 
     private async Task SubmitAsync(int questionId)
@@ -209,5 +210,15 @@ else
         }
 
         _busy = false;
+
+        await ScrollToTopIfCompletedAsync();
+    }
+
+    private async Task ScrollToTopIfCompletedAsync()
+    {
+        if (_session?.Status == InterviewSessionStatus.Completed)
+        {
+            await JS.InvokeVoidAsync("scrollTo", 0, 0);
+        }
     }
 }
